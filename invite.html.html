@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subbulakshmi & Deepak - Engagement Invitation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --bg-burgundy: #3a0d16;
+            --gold: #d4af37;
+            --gold-light: #f3e5ab;
+            --silver: #cbd5e1;
+            --text-light: #f8fafc;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Montserrat', sans-serif; background-color: var(--bg-burgundy); color: var(--text-light); min-height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+
+        /* Falling Petals and Glitter from reference file */
+        .petal { position: fixed; top: -10vh; background: radial-gradient(circle, #f3e5ab 0%, #cbd5e1 100%); border-radius: 150% 0 150% 0; opacity: 0.85; z-index: 25; animation: fall linear infinite; pointer-events: none; }
+        .glitter { position: fixed; top: -10vh; background: #f3e5ab; width: 4px; height: 4px; border-radius: 50%; box-shadow: 0 0 6px #d4af37; opacity: 0.9; z-index: 25; animation: fall linear infinite; pointer-events: none; }
+        @keyframes fall {
+            0% { transform: translateY(-10vh) translateX(0) rotate(0deg); opacity: 0.9; }
+            100% { transform: translateY(110vh) translateX(60px) rotate(360deg); opacity: 0; }
+        }
+
+        .invitation-wrapper { width: 100%; max-width: 440px; height: 100vh; max-height: 900px; background: #3a0d16; position: relative; overflow: hidden; display: flex; flex-direction: column; }
+        @media (min-width: 480px) { .invitation-wrapper { border-radius: 24px; box-shadow: 0 25px 50px rgba(0,0,0,0.7); border: 1px solid rgba(212, 175, 55, 0.4); } }
+
+        .audio-control-btn { position: absolute; top: 15px; right: 15px; background: rgba(58, 13, 22, 0.6); border: 1px solid var(--gold); color: var(--gold-light); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; z-index: 30; backdrop-filter: blur(4px); transition: all 0.3s ease; }
+        .audio-control-btn:hover { background: var(--gold); color: var(--bg-burgundy); }
+
+        .pages-container { position: relative; width: 100%; height: 100%; overflow-y: auto; scroll-snap-type: y mandatory; scroll-behavior: smooth; }
+        .pages-container::-webkit-scrollbar { display: none; }
+        
+        .section { min-height: 100%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; scroll-snap-align: start; scroll-snap-stop: always; background-size: cover; background-position: center; background-color: #3a0d16; }
+
+        /* Backgrounds for individual sheets */
+        #section-page1 { background-image: url('Untitled - August 16, 2026 at 16.56.49-5 (1).png'); }
+        #section-page2 { background-image: url('Untitled - August 16, 2026 at 16.56.49-6.png'); }
+        
+        /* SHEET 3: Exact layout and map positioning locked */
+        #section-page3 { 
+            background-image: url('Untitled - August 16, 2026 at 16.56.49-7.png'); 
+            justify-content: flex-start;
+            padding-top: 220px; 
+            padding-bottom: 25px;
+        }
+
+        /* Pure image entry page with slow smooth video-like opening scale/fade transition */
+        #section-envelope { 
+            background-image: url('Untitled - August 16, 2026 at 16.56.49-4 (1).png');
+            background-size: cover;
+            background-position: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 20;
+            cursor: pointer;
+            transition: transform 1.2s cubic-bezier(0.25, 1, 0.5, 1), opacity 1.0s ease;
+            transform-origin: center center;
+        }
+
+        #section-envelope.opening {
+            transform: scale(1.35);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Scratch Card Box: curved rectangle with a solid golden outline, rendered instantly */
+        .scratch-box { 
+            position: relative; 
+            width: 320px; 
+            height: 110px; 
+            background: rgba(58, 13, 22, 0.95); 
+            border: 2px solid var(--gold); 
+            border-radius: 16px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            overflow: hidden; 
+            margin-top: 375px; 
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        }
+
+        .scratch-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; touch-action: none; cursor: crosshair; transition: opacity 0.5s ease; border-radius: 14px; }
+        .scratch-reveal-text { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: var(--gold-light); text-align: center; line-height: 1.3; font-weight: 600; }
+
+        /* Countdown Section */
+        .countdown-wrapper-section { max-height: 0; overflow: hidden; opacity: 0; transition: max-height 0.8s ease, opacity 0.8s ease; width: 100%; text-align: center; margin-top: 15px; }
+        .countdown-wrapper-section.revealed { max-height: 250px; opacity: 1; }
+
+        .countdown-title-wrapper { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 12px; margin-bottom: 10px; width: 100%; }
+        .countdown-title-line { height: 1px; width: 45px; background: rgba(212, 175, 55, 0.6); }
+        .countdown-title-text { font-size: 11px; letter-spacing: 2px; color: var(--gold-light); font-weight: 500; text-transform: uppercase; white-space: nowrap; }
+
+        .countdown-container { display: flex; justify-content: center; gap: 8px; }
+        .countdown-box { background: rgba(58, 13, 22, 0.9); border: 1px solid var(--gold); border-radius: 8px; padding: 6px 8px; min-width: 52px; text-align: center; }
+        .countdown-number { font-family: 'Cormorant Garamond', serif; font-size: 22px; color: var(--gold-light); font-weight: 600; }
+        .countdown-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--silver); margin-top: 2px; }
+
+        .countdown-subtitle { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 16px; color: var(--silver); margin-top: 10px; }
+
+        /* Page 3: Locked Map Positioning */
+        .venue-card-container {
+            width: 370px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: rgba(58, 13, 22, 0.85);
+            border: 1px solid rgba(212, 175, 55, 0.5);
+            border-radius: 12px;
+            padding: 10px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+            z-index: 2;
+            margin-top: 16px; 
+        }
+
+        .map-frame-wrapper {
+            width: 100%;
+            height: 190px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--gold);
+            position: relative;
+            cursor: pointer;
+        }
+
+        .map-frame-wrapper iframe {
+            width: 100%;
+            height: 100%;
+            border: 0;
+            pointer-events: none;
+        }
+
+        .map-overlay-link {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            background: transparent;
+        }
+
+        .directions-btn {
+            margin-top: 10px;
+            background: transparent;
+            border: 1px solid var(--gold);
+            color: var(--gold-light);
+            padding: 7px 18px;
+            font-size: 11px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Montserrat', sans-serif;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        .directions-btn:hover {
+            background: var(--gold);
+            color: var(--bg-burgundy);
+        }
+
+        /* Absolute Very Bottom Section adjusted higher up */
+        .bottom-absolute-footer {
+            position: absolute;
+            bottom: 12px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px; 
+            z-index: 15;
+            pointer-events: auto;
+        }
+
+        .celebrate-btn {
+            background: linear-gradient(135deg, #3a0d16 0%, #2a080f 100%);
+            border: 1px solid var(--gold);
+            color: var(--gold-light);
+            padding: 9px 24px;
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            border-radius: 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            transition: all 0.3s ease;
+            font-family: 'Montserrat', sans-serif;
+        }
+        .celebrate-btn:hover {
+            background: var(--gold);
+            color: var(--bg-burgundy);
+        }
+
+        /* Golden heart */
+        .golden-heart { font-size: 20px; color: var(--gold); margin-top: 0px; text-shadow: 0 0 10px rgba(212, 175, 55, 0.8); animation: pulse-heart 1.5s infinite ease-in-out; }
+        @keyframes pulse-heart { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
+
+        /* Pagination Dots Indicator */
+        .page-indicators { position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 10; pointer-events: none; opacity: 0; transition: opacity 0.5s ease; }
+        .page-indicators.visible { opacity: 1; }
+        .dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(212, 175, 55, 0.4); transition: background 0.3s ease; }
+        .dot.active { background: var(--gold); }
+    </style>
+</head>
+<body>
+
+    <div id="particles-container"></div>
+
+    <audio id="bgAudio" loop>
+        <source src="background-music.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="invitation-wrapper">
+        <button class="audio-control-btn" id="audioToggleBtn" onclick="toggleAudio()" title="Toggle Audio">🔇</button>
+
+        <!-- PAGE 1: PURE ENTRY PAGE IMAGE WITH FULL TAP-TO-OPEN INTERACTION -->
+        <div class="section" id="section-envelope" onclick="openEnvelope()"></div>
+
+        <!-- PAGE INDICATORS -->
+        <div class="page-indicators" id="pageIndicators">
+            <div class="dot active" id="dot-0"></div>
+            <div class="dot" id="dot-1"></div>
+            <div class="dot" id="dot-2"></div>
+        </div>
+
+        <div class="pages-container" id="pagesContainer">
+
+            <!-- SHEET 1 (-5) -->
+            <div class="section" id="section-page1" style="justify-content: flex-start;">
+                <!-- Scratch Card Box: Curved rectangle with golden outline, rendered instantly -->
+                <div class="scratch-box" id="scratchBoxContainer">
+                    <div class="scratch-reveal-text" id="scratchRevealText">
+                        17th September 2026<br>
+                        <span style="font-size: 18px; font-family: 'Montserrat', sans-serif; letter-spacing: 1px; font-weight: 400;">6:00 PM Onwards</span>
+                    </div>
+                    <canvas class="scratch-canvas" id="scratchCanvas"></canvas>
+                </div>
+
+                <!-- Hidden Countdown Section that expands once revealed -->
+                <div class="countdown-wrapper-section" id="countdownWrapperSection">
+                    <div class="countdown-title-wrapper">
+                        <div class="countdown-title-line"></div>
+                        <div class="countdown-title-text">The countdown begins</div>
+                        <div class="countdown-title-line"></div>
+                    </div>
+
+                    <div class="countdown-container">
+                        <div class="countdown-box">
+                            <div class="countdown-number" id="days">00</div>
+                            <div class="countdown-label">Days</div>
+                        </div>
+                        <div class="countdown-box">
+                            <div class="countdown-number" id="hours">00</div>
+                            <div class="countdown-label">Hours</div>
+                        </div>
+                        <div class="countdown-box">
+                            <div class="countdown-number" id="minutes">00</div>
+                            <div class="countdown-label">Mins</div>
+                        </div>
+                        <div class="countdown-box">
+                            <div class="countdown-number" id="seconds">00</div>
+                            <div class="countdown-label">Secs</div>
+                        </div>
+                    </div>
+
+                    <div class="countdown-subtitle">Until our forever begins</div>
+                </div>
+            </div>
+
+            <!-- SHEET 2 (-6) -->
+            <div class="section" id="section-page2"></div>
+
+            <!-- SHEET 3 (-7): Locked Map Positioning + Exact Reference Heart -->
+            <div class="section" id="section-page3">
+                <div class="venue-card-container">
+                    <div class="map-frame-wrapper">
+                        <a href="https://maps.google.com/?q=Lara+Courtyard+Avadi+Chennai" target="_blank" class="map-overlay-link" title="Open Google Maps"></a>
+                        <iframe src="https://maps.google.com/maps?q=Lara%20Courtyard%20Avadi%20Chennai&t=&z=15&ie=UTF8&iwloc=&output=embed" allowfullscreen="" loading="lazy"></iframe>
+                    </div>
+                    <a href="https://maps.google.com/?q=Lara+Courtyard+Avadi+Chennai" target="_blank" class="directions-btn">Get Directions</a>
+                </div>
+
+                <!-- Absolute bottom footer with both button and heart moved higher up -->
+                <div class="bottom-absolute-footer">
+                    <button class="celebrate-btn" onclick="triggerCelebrateConfetti()">Celebrate with us</button>
+                    <div class="golden-heart">♥</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Falling petals and glitter initialization from reference file ending in 67
+        const particlesContainer = document.getElementById('particles-container');
+        
+        for (let i = 0; i < 15; i++) {
+            const petal = document.createElement('div');
+            petal.classList.add('petal');
+            const size = Math.random() * 10 + 8;
+            petal.style.width = `${size}px`;
+            petal.style.height = `${size * 1.6}px`;
+            petal.style.left = `${Math.random() * 100}vw`;
+            petal.style.animationDuration = `${Math.random() * 7 + 5}s`;
+            petal.style.animationDelay = `${Math.random() * 5}s`;
+            particlesContainer.appendChild(petal);
+        }
+
+        for (let i = 0; i < 20; i++) {
+            const glitter = document.createElement('div');
+            glitter.classList.add('glitter');
+            glitter.style.left = `${Math.random() * 100}vw`;
+            glitter.style.animationDuration = `${Math.random() * 4 + 3}s`;
+            glitter.style.animationDelay = `${Math.random() * 4}s`;
+            particlesContainer.appendChild(glitter);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const canvas = document.getElementById('scratchCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 320;
+            canvas.height = 110;
+
+            ctx.fillStyle = '#4a121d';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#f3e5ab';
+            ctx.font = '16px Montserrat, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('✨ Scratch Here to Reveal ✨', canvas.width / 2, canvas.height / 2 + 6);
+        });
+
+        let scratchInitialized = false;
+
+        function openEnvelope() {
+            const sectionEnvelope = document.getElementById('section-envelope');
+            const pageIndicators = document.getElementById('pageIndicators');
+            
+            const audio = document.getElementById('bgAudio');
+            const audioBtn = document.getElementById('audioToggleBtn');
+            if (audio) {
+                audio.volume = 0.5;
+                audio.play().then(() => {
+                    audioBtn.innerText = '🎵';
+                }).catch(error => {
+                    console.log("Audio autoplay prevented by browser:", error);
+                    audioBtn.innerText = '🔇';
+                });
+            }
+
+            sectionEnvelope.classList.add('opening');
+            pageIndicators.classList.add('visible');
+
+            initScratchCard();
+        }
+
+        function toggleAudio() {
+            const audio = document.getElementById('bgAudio');
+            const audioBtn = document.getElementById('audioToggleBtn');
+            if (audio.paused) {
+                audio.play();
+                audioBtn.innerText = '🎵';
+            } else {
+                audio.pause();
+                audioBtn.innerText = '🔇';
+            }
+        }
+
+        const pagesContainer = document.getElementById('pagesContainer');
+        const sections = document.querySelectorAll('.section:not(#section-envelope)');
+        
+        pagesContainer.addEventListener('scroll', () => {
+            let index = Math.round(pagesContainer.scrollTop / pagesContainer.clientHeight);
+            sections.forEach((_, i) => {
+                const dot = document.getElementById(`dot-${i}`);
+                if (dot) {
+                    if (i === index) dot.classList.add('active');
+                    else dot.classList.remove('active');
+                }
+            });
+        });
+
+        function triggerCelebrateConfetti() {
+            confetti({
+                particleCount: 140,
+                spread: 90,
+                origin: { y: 0.85 },
+                colors: ['#d4af37', '#f3e5ab', '#cbd5e1', '#3a0d16']
+            });
+        }
+
+        function initScratchCard() {
+            if (scratchInitialized) return;
+            scratchInitialized = true;
+
+            const canvas = document.getElementById('scratchCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = canvas.offsetWidth || 320;
+            canvas.height = canvas.offsetHeight || 110;
+
+            ctx.fillStyle = '#4a121d';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#f3e5ab';
+            ctx.font = '16px Montserrat, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('✨ Scratch Here to Reveal ✨', canvas.width / 2, canvas.height / 2 + 6);
+
+            let isDrawing = false;
+            let revealedAuto = false;
+            let moveCount = 0;
+
+            function autoClearAndReveal() {
+                if (revealedAuto) return;
+                revealedAuto = true;
+                
+                canvas.style.transition = 'opacity 0.6s ease';
+                canvas.style.opacity = '0';
+                
+                setTimeout(() => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    canvas.style.pointerEvents = 'none';
+                }, 600);
+
+                document.getElementById('countdownWrapperSection').classList.add('revealed');
+                triggerFinalCelebration();
+            }
+
+            function processScratch(e) {
+                if (!isDrawing || revealedAuto) return;
+                const pos = getPosition(e);
+
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.beginPath();
+                ctx.arc(pos.x, pos.y, 35, 0, Math.PI * 2);
+                ctx.fill();
+
+                moveCount++;
+
+                if (moveCount > 8) {
+                    autoClearAndReveal();
+                }
+            }
+
+            function getPosition(e) {
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+                const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+                return {
+                    x: clientX - rect.left,
+                    y: clientY - rect.top
+                };
+            }
+
+            canvas.addEventListener('mousedown', (e) => {
+                isDrawing = true;
+                moveCount += 2;
+                processScratch(e);
+            });
+            canvas.addEventListener('mousemove', processScratch);
+            window.addEventListener('mouseup', () => { isDrawing = false; });
+
+            canvas.addEventListener('touchstart', (e) => {
+                isDrawing = true;
+                moveCount += 2;
+                processScratch(e);
+                e.preventDefault();
+            });
+            canvas.addEventListener('touchmove', (e) => {
+                processScratch(e);
+                e.preventDefault();
+            });
+            window.addEventListener('touchend', () => { isDrawing = false; });
+        }
+
+        const eventDate = new Date('September 17, 2026 18:00:00').getTime();
+
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const distance = eventDate - now;
+
+            if (distance < 0) return;
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const realMinutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            document.getElementById('days').innerText = String(days).padStart(2, '0');
+            document.getElementById('hours').innerText = String(hours).padStart(2, '0');
+            document.getElementById('minutes').innerText = String(realMinutes).padStart(2, '0');
+            document.getElementById('seconds').innerText = String(seconds).padStart(2, '0');
+        }
+
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+
+        function triggerFinalCelebration() {
+            confetti({
+                particleCount: 150,
+                spread: 100,
+                origin: { y: 0.6 },
+                colors: ['#d4af37', '#f3e5ab', '#cbd5e1', '#3a0d16']
+            });
+        }
+    </script>
+</body>
+</html>
